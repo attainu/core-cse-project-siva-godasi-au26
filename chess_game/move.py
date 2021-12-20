@@ -17,35 +17,42 @@ class Move(board):
         self.coin = self.grid[x][y]
         self.end_coin = self.grid[ex][ey]
         
-        if (self.coin=='*' or self.turn==1 and (self.coin[0]=='B' or self.end_coin[0]=='W')) or (self.turn==0 and (self.coin[0]=='W' or self.end_coin[0]=='B')):
+        if (self.coin=='**' or self.turn==1 and (self.coin[0]=='B' or self.end_coin[0]=='W')) or (self.turn==0 and (self.coin[0]=='W' or self.end_coin[0]=='B')):
             print("invalid move")
         else:
             res = self.movabale(x,y,ex,ey)
             if res == True:
                 self.grid[ex][ey] =self.coin
-                self.grid[x][y] = '*'
+                self.grid[x][y] = '**'
             else:
                 print("invalid move")
 
     def move(self):
         #moves takes from console and use required functions to change the postion of the coin
-            self.turn == 1
+        if  self.turn == 1:
             print("white's move & x,y values should be >=0 and <=7")
             x,y = map(int,input("enter the starting point").split())
             ex,ey = map(int,input("enter the ending point").split())
             self.valid_move(x,y,ex,ey)
             self.print_grid()
-            self.check(self.bx,self.by,self.wx,self.wy)
-            self.checkmate(self.wx,self.wy,self.bx,self.by)
-            self.turn = 0
+            self.check()
+            self.checkmate()
+            if self.checkmate == True:
+                self.turn !=0
+            else:
+                self.turn = 0
+        if self.turn == 0:
             print("blacks move")
             x,y = map(int,input("enter the starting point").split())
             ex,ey = map(int,input("enter the ending point").split())
             self.valid_move(x,y,ex,ey)
             self.print_grid()
-            self.check(self.bx,self.by,self.wx,self.wy)
-            self.checkmate(self.wx,self.wy,self.bx,self.by)
-            self.turn = 1
+            self.check()
+            self.checkmate()
+            if self.checkmate == True:
+                self.turn !=1
+            else:
+                self.turn = 1
             self.move()
     
     def straight(self,x,y,ex,ey):
@@ -81,7 +88,7 @@ class Move(board):
                 return True
             return False
         elif self.coin[1] == 'P':
-            if self.straight(x,y,ex,ey) or ((self.diagnal(x,y,ex,ey)and self.grid[ex][ey]!='*')):
+            if self.straight(x,y,ex,ey) or ((self.diagnal(x,y,ex,ey)and self.grid[ex][ey]!='**')):
              if (abs(x-ex)<=1 and abs(y-ey)<=1):
                     if self.coin[0] == 'B' and (ex > x):
                         return True
@@ -104,52 +111,48 @@ class Move(board):
             diry = 0
         stx,sty =x+dirx,y+diry
         while(stx!=ex or sty!=ey):
-            if self.grid[stx][sty] != '*':
+            if self.grid[stx][sty] != '**':
                 return False
             stx+=dirx
             sty+=diry
         return True
 
     
-    def check(self,bx,by,wx,wy):
-        if (bx,by,wx,wy) == (-1,-1,-1,-1):
-            for x in range(8):
-                for y in range(8):
-                    if self.grid[x][y] == 'BK':
-                        bx,by = x,y
-                    if self.grid[x][y] == 'WK':
-                        wx,wy = x,y
-
+    def check(self):
+        
         for x in range(8):
             for y in range(8):
-                if self.grid[x][y] != '*':
-                    if (self.movabale(x,y,bx,by) and self.grid[x][y][0]=='W'):
+                if self.grid[x][y] == 'BK':
+                    self.bx,self.by = x,y
+                if self.grid[x][y] == 'WK':
+                    self.wx,self.wy = x,y
+       
+        for x in range(8):
+            for y in range(8):
+                if self.grid[x][y] != '**':
+                    if (self.movabale(x,y,self.bx,self.by) and self.grid[x][y][0]=='W'):
                         print('Black check')
 
         for x in range(8):
             for y in range(8):
-                if self.grid[x][y] != '*':
-                    if (self.movabale(x,y,wx,wy) and self.grid[x][y][0]=='B'):
+                if self.grid[x][y] != '**':
+                    if (self.movabale(x,y,self.wx,self.wy) and self.grid[x][y][0]=='B'):
                         print('White check')  
 
-    def checkmate(self,wx,wy,bx,by):
+    def checkmate(self):
         for x in [0,1,-1]:
             for y in [0,1,-1]:
-                if wx+x in range(8) and wy+y in range(8) and self.grid[wx+x][wy+y]=='*':
-                    s = self.check(wx+x,wy+y,-1,-1)
-                    if s == True:
-                        print("checkmate for white")
+                if self.wx+x in range(8) and self.wy+y in range(8) and self.grid[self.wx+x][self.wy+y]=='**' and self.check():
+                    print(" white checkmate")
+          
         for x in [0,1,-1]:
             for y in [0,1,-1]:
-                if bx+x in range(8) and by+y in range(8) and self.grid[bx+x][by+y]=='*':
-                    s = self.check(bx+x,by+y,-1,-1)
-                    if s == True:
-                        print("checkmate for black")
-
+                if self.bx+x in range(8) and self.by+y in range(8) and self.grid[self.bx+x][self.by+y]=='**' and self.check():
+                    print("black checkmate")     
+    
 
     def print_grid(self):
         # for print the grid
         for i in self.grid:
-            if  (self.coin == '*' or (self.turn==1 and (self.coin[0]=='B' or self.end_coin[0]=='W')) or (self.turn==0 and (self.coin[0]=='W' or self.end_coin[0]=='B'))) == False:
+            if  (self.coin == '**' or (self.turn==1 and (self.coin[0]=='B' or self.end_coin[0]=='W')) or (self.turn==0 and (self.coin[0]=='W' or self.end_coin[0]=='B'))) == False:
                 print(i)
-
